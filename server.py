@@ -19,7 +19,6 @@ DB_NAME = os.environ.get("DB_NAME", "mini_browser")
 def init_db():
     """Ensure database and table exist."""
     try:
-        # First connect without specifying database
         conn = mysql.connector.connect(
             host=DB_HOST,
             user=DB_USER,
@@ -33,14 +32,16 @@ def init_db():
 
         # Create table if it doesn't exist
         cursor.execute("""
-            CREATE TABLE IF NOT EXISTS contact_messages (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                name VARCHAR(255) NOT NULL,
-                email VARCHAR(255) NOT NULL,
-                message TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+           CREATE TABLE IF NOT EXISTS contact_messages (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+           name VARCHAR(255) NOT NULL,
+           email VARCHAR(255) NOT NULL,
+          message TEXT NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE KEY unique_email_message (email, message(255))
             )
         """)
+
         conn.commit()
         cursor.close()
         conn.close()
@@ -78,12 +79,23 @@ def contact():
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
+
+        # 🔒 Try to insert; if duplicate message, return success anyway
         query = "INSERT INTO contact_messages (name, email, message) VALUES (%s, %s, %s)"
-        cursor.execute(query, (name, email, message))
-        conn.commit()
+        try:
+            cursor.execute(query, (name, email, message))
+            conn.commit()
+            response_msg = "Message submitted successfully."
+        except mysql.connector.Error as e:
+            if e.errno == 1062:  # Duplicate entry (message already exists)
+                response_msg = "Message already received earlier."
+            else:
+                raise e
+
         cursor.close()
         conn.close()
-        return jsonify({"status": "success", "message": "Message submitted successfully."}), 200
+        return jsonify({"status": "success", "message": response_msg}), 200
+
     except mysql.connector.Error as e:
         print("❌ Database Error:", e)
         return jsonify({"status": "error", "message": "Database connection or query failed."}), 500
