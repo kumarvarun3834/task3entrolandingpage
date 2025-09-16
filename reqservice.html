@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Request a Service</title>
+<style>
+  body { font-family: Arial, sans-serif; background:#f7f7f7; padding:20px; }
+  .container { max-width:500px; margin:auto; background:#fff; padding:20px; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.1); }
+  label { display:block; margin-top:15px; }
+  input, textarea, select { width:100%; padding:8px; margin-top:5px; border:1px solid #ccc; border-radius:4px; }
+  button { margin-top:20px; padding:10px 20px; border:none; background:#007BFF; color:#fff; border-radius:4px; cursor:pointer; }
+  button:hover { background:#0056b3; }
+  .message { margin-top:15px; padding:10px; border-radius:4px; }
+  .success { background:#d4edda; color:#155724; }
+  .error { background:#f8d7da; color:#721c24; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Request a Service</h2>
+  <form id="serviceForm">
+    <label for="name">Name*</label>
+    <input type="text" id="name" required>
+
+    <label for="email">Email*</label>
+    <input type="email" id="email" required>
+
+    <label for="service">Service*</label>
+    <select id="service" required>
+      <option value="">-- Select a service --</option>
+      <option value="Writing">Writing</option>
+      <option value="Web Design">Web Design</option>
+      <option value="Web Development">Web Development</option>
+      <option value="Application Development">Application Development</option>
+      <option value="Blogging">Blogging</option>
+      <option value="Ghostwriting">Ghostwriting</option>
+      <option value="Logo Design">Logo Design</option>
+    </select>
+
+    <!-- Conditional field for languages/frameworks -->
+    <div id="subDetailsContainer" style="display:none;">
+      <label for="sub_details">Specify Languages / Frameworks*</label>
+      <input type="text" id="sub_details">
+    </div>
+
+    <label for="details">Additional Details*</label>
+    <textarea id="details" rows="4" required></textarea>
+
+    <!-- Honeypot field (hidden for humans) -->
+    <input type="text" id="website" name="website" style="display:none;">
+
+    <button type="submit">Submit Request</button>
+  </form>
+
+  <div id="responseMessage" class="message" style="display:none;"></div>
+</div>
+
+<script>
+const serviceSelect = document.getElementById('service');
+const subDetailsContainer = document.getElementById('subDetailsContainer');
+const subDetailsInput = document.getElementById('sub_details');
+const form = document.getElementById('serviceForm');
+const responseMessage = document.getElementById('responseMessage');
+
+serviceSelect.addEventListener('change', () => {
+  if(serviceSelect.value === 'Web Development' || serviceSelect.value === 'Application Development'){
+    subDetailsContainer.style.display = 'block';
+    subDetailsInput.required = true;
+  } else {
+    subDetailsContainer.style.display = 'none';
+    subDetailsInput.required = false;
+    subDetailsInput.value = '';
+  }
+});
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  responseMessage.style.display = 'none';
+
+  const data = {
+    name: document.getElementById('name').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    service: serviceSelect.value,
+    sub_details: subDetailsInput.value.trim(),
+    details: document.getElementById('details').value.trim(),
+    website: document.getElementById('website').value.trim() // honeypot
+  };
+
+  try {
+    const res = await fetch('http://localhost:5001/request-service', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+
+    responseMessage.style.display = 'block';
+    if(result.status === 'success'){
+      responseMessage.className = 'message success';
+      form.reset();
+      subDetailsContainer.style.display = 'none';
+    } else if(result.status === 'duplicate') {
+      responseMessage.className = 'message error';
+    } else {
+      responseMessage.className = 'message error';
+    }
+    responseMessage.innerText = result.message;
+
+  } catch(err) {
+    responseMessage.style.display = 'block';
+    responseMessage.className = 'message error';
+    responseMessage.innerText = '⚠️ Could not connect to the server. Try again later.';
+  }
+});
+</script>
+
+</body>
+</html>

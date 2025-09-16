@@ -135,13 +135,28 @@ def contact():
 
     try:
         conn = get_db_connection()
-        cursor = conn.cursor()
+        cursor = conn.cursor(dictionary=True)
 
         query = "INSERT INTO contact_messages (name, email, message) VALUES (%s, %s, %s)"
         try:
             cursor.execute(query, (name, email, message))
             conn.commit()
             response = {"status": "success", "message": "✅ Message submitted successfully."}
+
+            # --- Logging: new message ---
+            print("📩 New Message Received:")
+            print(f"Name: {name}, Email: {email}, Message: {message}")
+
+            # --- Logging: current table (last 10 entries) ---
+            cursor.execute("SELECT id, name, email, message, created_at FROM contact_messages ORDER BY created_at DESC LIMIT 10")
+            recent_entries = cursor.fetchall()
+            print("🗂 Current Contact Table (last 10 entries):")
+            for entry in recent_entries:
+                print(entry)
+
+            # Optionally include recent entries in response for frontend debugging
+            response["recent_entries"] = recent_entries
+
         except mysql.connector.Error as e:
             if e.errno == 1062:  # Duplicate entry
                 response = {
