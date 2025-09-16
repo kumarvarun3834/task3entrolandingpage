@@ -4,7 +4,6 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import mysql.connector
 import os
-import re
 import time
 
 app = Flask(__name__)
@@ -34,8 +33,16 @@ def init_db():
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 name VARCHAR(255) NOT NULL,
                 email VARCHAR(255) NOT NULL,
+                phone VARCHAR(20),
                 service VARCHAR(50) NOT NULL,
-                specifics TEXT,
+                sub_details TEXT,
+                details TEXT,
+                priority INT NOT NULL DEFAULT 3,  -- 1 to 5
+                budget INT DEFAULT NULL,
+                platform VARCHAR(50),
+                attachment_link TEXT,
+                notes TEXT,
+                deadline DATE,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
@@ -92,15 +99,30 @@ def request_service():
     data = request.get_json()
     name = data.get("name", "").strip()
     email = data.get("email", "").strip()
-    service = data.get("service", "").strip()  # fixed options
-    specifics = data.get("specifics", "").strip()  # optional text field
-    honeypot = data.get("website", "").strip()  # hidden field
+    phone = data.get("phone", "").strip()
+    service = data.get("service", "").strip()
+    sub_details = data.get("sub_details", "").strip()
+    details = data.get("details", "").strip()
+    priority = int(data.get("priority", 3))
+    budget = data.get("budget")
+    platform = data.get("platform", "").strip()
+    attachment_link = data.get("attachment_link", "").strip()
+    notes = data.get("notes", "").strip()
+    deadline = data.get("deadline")  # Expecting YYYY-MM-DD
+    honeypot = data.get("website", "").strip()
 
     # --- Honeypot ---
     if honeypot:
         return jsonify({"status": "error", "message": "Spam detected."}), 400
     if not name or not email or not service:
         return jsonify({"status": "error", "message": "Name, email, and service are required."}), 400
+    if not (1 <= priority <= 5):
+        return jsonify({"status": "error", "message": "Priority must be between 1 and 5."}), 400
+    if budget:
+        try:
+            budget = int(budget)
+        except:
+            return jsonify({"status": "error", "message": "Budget must be a number."}), 400
 
     # --- Spam check ---
     ip = get_client_ip()
@@ -111,16 +133,23 @@ def request_service():
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        query = "INSERT INTO service_requests (name, email, service, specifics) VALUES (%s, %s, %s, %s)"
-        cursor.execute(query, (name, email, service, specifics))
+        query = """
+            INSERT INTO service_requests 
+            (name, email, phone, service, sub_details, details, priority, budget, platform, attachment_link, notes, deadline)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        cursor.execute(query, (name, email, phone, service, sub_details, details, priority, budget, platform, attachment_link, notes, deadline))
         conn.commit()
 
         # --- Logging ---
         print("📩 New Service Request:")
-        print(f"Name: {name}, Email: {email}, Service: {service}, Specifics: {specifics}")
+        print(f"Name: {name}, Email: {email}, Phone: {phone}, Service: {service}, SubDetails: {sub_details}, Details: {details}, Priority: {priority}, Budget: {budget}, Platform: {platform}, Attachment: {attachment_link}, Notes: {notes}, Deadline: {deadline}")
 
         # --- Recent entries ---
-        cursor.execute("SELECT id, name, email, service, specifics, created_at FROM service_requests ORDER BY created_at DESC LIMIT 10")
+        cursor.execute("""
+            SELECT id, name, email, phone, service, sub_details, details, priority, budget, platform, attachment_link, notes, deadline, created_at 
+            FROM service_requests ORDER BY created_at DESC LIMIT 10
+        """)
         recent_entries = cursor.fetchall()
         print("🗂 Current Service Requests (last 10 entries):")
         for entry in recent_entries:
@@ -128,7 +157,6 @@ def request_service():
 
         cursor.close()
         conn.close()
-
         return jsonify({"status": "success", "message": "✅ Service request submitted successfully.", "recent_entries": recent_entries}), 200
 
     except mysql.connector.Error as e:
