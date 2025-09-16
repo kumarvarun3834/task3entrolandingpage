@@ -15,6 +15,39 @@ DB_USER = os.environ.get("DB_USER", "root")
 DB_PASS = os.environ.get("DB_PASS", "")
 DB_NAME = os.environ.get("DB_NAME", "mini_browser")
 
+# --- Database Setup ---
+def init_db():
+    """Ensure database and table exist."""
+    try:
+        # First connect without specifying database
+        conn = mysql.connector.connect(
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASS
+        )
+        cursor = conn.cursor()
+
+        # Create database if it doesn't exist
+        cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_NAME}")
+        cursor.execute(f"USE {DB_NAME}")
+
+        # Create table if it doesn't exist
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS contact_messages (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                email VARCHAR(255) NOT NULL,
+                message TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        conn.commit()
+        cursor.close()
+        conn.close()
+        print(f"✅ Database '{DB_NAME}' and table 'contact_messages' are ready.")
+    except Exception as e:
+        print("❌ Database Initialization Error:", e)
+
 # --- Database Connection ---
 def get_db_connection():
     return mysql.connector.connect(
@@ -51,10 +84,14 @@ def contact():
         cursor.close()
         conn.close()
         return jsonify({"status": "success", "message": "Message submitted successfully."}), 200
+    except mysql.connector.Error as e:
+        print("❌ Database Error:", e)
+        return jsonify({"status": "error", "message": "Database connection or query failed."}), 500
     except Exception as e:
-        print("Database Error:", e)
+        print("❌ Unexpected Error:", e)
         return jsonify({"status": "error", "message": "Server error. Please try again later."}), 500
 
 # --- Run Server ---
 if __name__ == "__main__":
+    init_db()  # Ensure DB + table exist before starting
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
