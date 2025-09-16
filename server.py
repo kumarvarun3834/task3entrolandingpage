@@ -26,19 +26,17 @@ def init_db():
         )
         cursor = conn.cursor()
 
-        # Create database if it doesn't exist
         cursor.execute(f"CREATE DATABASE IF NOT EXISTS {DB_NAME}")
         cursor.execute(f"USE {DB_NAME}")
 
-        # Create table if it doesn't exist
         cursor.execute("""
            CREATE TABLE IF NOT EXISTS contact_messages (
             id INT AUTO_INCREMENT PRIMARY KEY,
-           name VARCHAR(255) NOT NULL,
-           email VARCHAR(255) NOT NULL,
-          message TEXT NOT NULL,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          UNIQUE KEY unique_email_message (email, message(255))
+            name VARCHAR(255) NOT NULL,
+            email VARCHAR(255) NOT NULL,
+            message TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY unique_email_message (email, message(255))
             )
         """)
 
@@ -70,7 +68,6 @@ def contact():
     email = data.get("email", "").strip()
     message = data.get("message", "").strip()
 
-    # --- Basic Validation ---
     if not name or not email or not message:
         return jsonify({"status": "error", "message": "All fields are required."}), 400
     if not is_valid_email(email):
@@ -80,21 +77,23 @@ def contact():
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # 🔒 Try to insert; if duplicate message, return success anyway
         query = "INSERT INTO contact_messages (name, email, message) VALUES (%s, %s, %s)"
         try:
             cursor.execute(query, (name, email, message))
             conn.commit()
-            response_msg = "Message submitted successfully."
+            response = {"status": "success", "message": "✅ Message submitted successfully."}
         except mysql.connector.Error as e:
-            if e.errno == 1062:  # Duplicate entry (message already exists)
-                response_msg = "Message already received earlier."
+            if e.errno == 1062:  # Duplicate entry
+                response = {
+                    "status": "duplicate",
+                    "message": "⚠️ This message was already received earlier. Please wait for a response."
+                }
             else:
                 raise e
 
         cursor.close()
         conn.close()
-        return jsonify({"status": "success", "message": response_msg}), 200
+        return jsonify(response), 200
 
     except mysql.connector.Error as e:
         print("❌ Database Error:", e)
@@ -105,5 +104,5 @@ def contact():
 
 # --- Run Server ---
 if __name__ == "__main__":
-    init_db()  # Ensure DB + table exist before starting
+    init_db()
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
