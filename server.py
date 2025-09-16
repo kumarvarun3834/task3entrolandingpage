@@ -5,6 +5,7 @@ from flask_cors import CORS
 import mysql.connector
 import os
 import re
+import dns.resolver  # 👈 added for MX lookup
 
 app = Flask(__name__)
 CORS(app)  # Allow cross-origin requests
@@ -58,7 +59,16 @@ def get_db_connection():
 
 # --- Helper: Validate Email ---
 def is_valid_email(email):
-    return re.match(r"[^@]+@[^@]+\.[^@]+", email)
+    """Check format + MX record existence."""
+    if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+        return False
+
+    domain = email.split("@")[-1]
+    try:
+        dns.resolver.resolve(domain, "MX")  # 👈 check if domain has mail server
+        return True
+    except Exception:
+        return False
 
 # --- Routes ---
 @app.route("/contact", methods=["POST"])
@@ -71,7 +81,7 @@ def contact():
     if not name or not email or not message:
         return jsonify({"status": "error", "message": "All fields are required."}), 400
     if not is_valid_email(email):
-        return jsonify({"status": "error", "message": "Invalid email address."}), 400
+        return jsonify({"status": "error", "message": "Invalid or non-existent email address."}), 400
 
     try:
         conn = get_db_connection()
