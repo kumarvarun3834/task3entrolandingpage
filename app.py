@@ -53,7 +53,6 @@ def init_db():
                 service VARCHAR(50) NOT NULL,
                 sub_details TEXT,
                 details TEXT,
-                priority INT NOT NULL DEFAULT 3,  -- 1 to 5
                 budget INT DEFAULT NULL,
                 platform VARCHAR(50),
                 attachment_link TEXT,
@@ -96,10 +95,7 @@ def get_client_ip():
     return request.remote_addr
 
 def check_rate_limit(ip, email, table):
-    """Rate limit: checks last entry in given table for same email."""
     now = time.time()
-
-    # --- Per IP ---
     if ip not in rate_limit:
         rate_limit[ip] = []
     rate_limit[ip] = [t for t in rate_limit[ip] if now - t < 60]
@@ -107,7 +103,6 @@ def check_rate_limit(ip, email, table):
         return False, "⚠️ Too many requests from your IP. Please try again later."
     rate_limit[ip].append(now)
 
-    # --- Per email ---
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute(f"""
@@ -180,7 +175,6 @@ def request_service():
     service = data.get("service", "").strip()
     sub_details = data.get("sub_details", "").strip()
     details = data.get("details", "").strip()
-    priority = int(data.get("priority", 3))
     budget = data.get("budget")
     platform = data.get("platform", "").strip()
     attachment_link = data.get("attachment_link", "").strip()
@@ -192,8 +186,6 @@ def request_service():
         return jsonify({"status": "error", "message": "Spam detected."}), 400
     if not name or not email or not service:
         return jsonify({"status": "error", "message": "Name, email, and service are required."}), 400
-    if not (1 <= priority <= 5):
-        return jsonify({"status": "error", "message": "Priority must be 1-5."}), 400
     if budget:
         try:
             budget = int(budget)
@@ -211,15 +203,15 @@ def request_service():
 
         query = """
             INSERT INTO service_requests 
-            (name, email, phone, service, sub_details, details, priority, budget, platform, attachment_link, notes, deadline)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            (name, email, phone, service, sub_details, details, budget, platform, attachment_link, notes, deadline)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
-        cursor.execute(query, (name, email, phone, service, sub_details, details, priority, budget, platform, attachment_link, notes, deadline))
+        cursor.execute(query, (name, email, phone, service, sub_details, details, budget, platform, attachment_link, notes, deadline))
         conn.commit()
 
         response = {"status": "success", "message": "✅ Service request submitted successfully."}
 
-        cursor.execute("""SELECT id, name, email, phone, service, sub_details, details, priority, budget, platform, attachment_link, notes, deadline, created_at 
+        cursor.execute("""SELECT id, name, email, phone, service, sub_details, details, budget, platform, attachment_link, notes, deadline, created_at 
                           FROM service_requests ORDER BY created_at DESC LIMIT 10""")
         response["recent_entries"] = cursor.fetchall()
 
