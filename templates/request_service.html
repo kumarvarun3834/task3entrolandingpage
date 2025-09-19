@@ -1,0 +1,38 @@
+<?php
+session_start();
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $name = trim($_POST['name']);
+    $email = $_SESSION['email'] ?? $_POST['email'];
+    $phone = trim($_POST['phone']);
+    $service = trim($_POST['service']);
+    $details = trim($_POST['details']);
+
+    if (!$name || !$email || !$service || !$details) {
+        die("❌ All required fields must be filled.");
+    }
+
+    // Send data to Flask backend
+    $backend_url = "http://localhost:5000/request-service";  // change if deployed
+    $data = json_encode([
+        "name" => $name,
+        "email" => $email,
+        "phone" => $phone,
+        "service" => $service,
+        "details" => $details
+    ]);
+
+    $options = [
+        "http" => [
+            "header"  => "Content-Type: application/json\r\n",
+            "method"  => "POST",
+            "content" => $data
+        ]
+    ];
+    $context  = stream_context_create($options);
+    $result = file_get_contents($backend_url, false, $context);
+
+    header("Location: index.php#request-service");
+    exit;
+}
+?>

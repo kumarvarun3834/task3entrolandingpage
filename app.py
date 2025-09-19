@@ -1,7 +1,8 @@
 # /backend/server.py
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template, session, redirect, url_for, flash
 from flask_cors import CORS
+from flask_session import Session
 import mysql.connector
 import os
 import re
@@ -10,6 +11,11 @@ import time
 
 app = Flask(__name__)
 CORS(app)
+
+# --- Secret + Sessions ---
+app.secret_key = "super-secret-key"  # change this
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
 
 # --- Environment Variables ---
 DB_HOST = os.environ.get("DB_HOST", "localhost")
@@ -65,7 +71,7 @@ def init_db():
         conn.commit()
         cursor.close()
         conn.close()
-        print(f"✅ Database '{DB_NAME}' initialized with tables 'contact_messages' & 'service_requests'.")
+        print(f"✅ Database '{DB_NAME}' initialized with tables.")
     except Exception as e:
         print("❌ Database Initialization Error:", e)
 
@@ -119,14 +125,37 @@ def check_rate_limit(ip, email, table):
             return False, f"⚠️ You must wait {EMAIL_COOLDOWN} seconds before sending another request."
     return True, None
 
-# --- Routes ---
+# --- Landing Page ---
+@app.route("/")
+def index():
+    return render_template("index2.html", email=session.get("email"))
+
+# --- Login + Logout ---
+@app.route("/login", methods=["POST"])
+def login():
+    email = request.form.get("email", "").strip()
+    if not email:
+        flash("⚠️ Please enter a valid email.", "error")
+        return redirect(url_for("index"))
+    session["email"] = email
+    flash(f"✅ Logged in as {email}", "success")
+    return redirect(url_for("index"))
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    flash("✅ Logged out successfully.", "success")
+    return redirect(url_for("index"))
+
+# --- Contact Form ---
 @app.route("/contact", methods=["POST"])
 def contact():
-    data = request.get_json()
+    data = request.get_json() if request.is_json else request.form
+
     name = data.get("name", "").strip()
     email = data.get("email", "").strip()
     message = data.get("message", "").strip()
-    honeypot = data.get("website", "").strip()
+    honeypot = data.get("website", "").strip() if "website" in data else ""
 
     if honeypot:
         return jsonify({"status": "error", "message": "Spam detected."}), 400
@@ -149,10 +178,6 @@ def contact():
             cursor.execute(query, (name, email, message))
             conn.commit()
             response = {"status": "success", "message": "✅ Message submitted successfully."}
-
-            cursor.execute("SELECT id, name, email, message, created_at FROM contact_messages ORDER BY created_at DESC LIMIT 10")
-            response["recent_entries"] = cursor.fetchall()
-
         except mysql.connector.Error as e:
             if e.errno == 1062:
                 response = {"status": "duplicate", "message": "⚠️ This message was already received earlier."}
@@ -161,26 +186,33 @@ def contact():
 
         cursor.close()
         conn.close()
+
+        if not request.is_json:
+            flash(response["message"], response["status"])
+            return redirect(url_for("index"))
+
         return jsonify(response), 200
     except Exception as e:
         print("❌ Contact Error:", e)
         return jsonify({"status": "error", "message": "Server error."}), 500
 
+# --- Service Request Form ---
 @app.route("/request-service", methods=["POST"])
 def request_service():
-    data = request.get_json()
+    data = request.get_json() if request.is_json else request.form
+
     name = data.get("name", "").strip()
     email = data.get("email", "").strip()
     phone = data.get("phone", "").strip()
     service = data.get("service", "").strip()
-    sub_details = data.get("sub_details", "").strip()
-    details = data.get("details", "").strip()
-    budget = data.get("budget")
-    platform = data.get("platform", "").strip()
-    attachment_link = data.get("attachment_link", "").strip()
-    notes = data.get("notes", "").strip()
-    deadline = data.get("deadline")
-    honeypot = data.get("website", "").strip()
+    sub_details = data.get("sub_details", "").strip() if "sub_details" in data else ""
+    details = data.get("details", "").strip() if "details" in data else ""
+    budget = data.get("budget", "").strip() if "budget" in data else None
+    platform = data.get("platform", "").strip() if "platform" in data else ""
+    attachment_link = data.get("attachment_link", "").strip() if "attachment_link" in data else ""
+    notes = data.get("notes", "").strip() if "notes" in data else ""
+    deadline = data.get("deadline", "").strip() if "deadline" in data else ""
+    honeypot = data.get("website", "").strip() if "website" in data else ""
 
     if honeypot:
         return jsonify({"status": "error", "message": "Spam detected."}), 400
@@ -211,12 +243,13 @@ def request_service():
 
         response = {"status": "success", "message": "✅ Service request submitted successfully."}
 
-        cursor.execute("""SELECT id, name, email, phone, service, sub_details, details, budget, platform, attachment_link, notes, deadline, created_at 
-                          FROM service_requests ORDER BY created_at DESC LIMIT 10""")
-        response["recent_entries"] = cursor.fetchall()
-
         cursor.close()
         conn.close()
+
+        if not request.is_json:
+            flash(response["message"], response["status"])
+            return redirect(url_for("index"))
+
         return jsonify(response), 200
     except Exception as e:
         print("❌ Service Request Error:", e)

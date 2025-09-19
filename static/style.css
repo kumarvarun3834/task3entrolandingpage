@@ -1,0 +1,40 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0; padding: 0;
+}
+.section {
+  padding: 50px;
+  text-align: center;
+}
+.splash {
+  background: #222; color: white;
+  height: 100vh; display: flex; justify-content: center; align-items: center;
+  flex-direction: column;
+}
+.btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background: #0077ff;
+  color: white; text-decoration: none;
+  border-radius: 5px;
+}
+.request form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+  margin: auto;
+}
+.request input, .request select, .request textarea {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+.request button {
+  background: #0077ff;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
