@@ -1,4 +1,44 @@
-<?php session_start(); ?>
+<?php
+session_start();
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+// Google Client
+$client = new Google_Client();
+$client->setClientId("YOUR_GOOGLE_CLIENT_ID");
+$client->setClientSecret("YOUR_GOOGLE_CLIENT_SECRET");
+$client->setRedirectUri("http://localhost/index.php");
+$client->addScope("email");
+$client->addScope("profile");
+
+// Handle Google OAuth callback
+if (isset($_GET['code'])) {
+    $token = $client->fetchAccessTokenWithAuthCode($_GET['code']);
+    if (!isset($token['error'])) {
+        $client->setAccessToken($token['access_token']);
+        $_SESSION['access_token'] = $token['access_token'];
+
+        // Get user info
+        $oauth = new Google_Service_Oauth2($client);
+        $google_account_info = $oauth->userinfo->get();
+
+        $_SESSION['email'] = $google_account_info->email;
+        $_SESSION['name'] = $google_account_info->name;
+        $_SESSION['picture'] = $google_account_info->picture;
+
+        header("Location: index.php");
+        exit();
+    }
+}
+
+// Logout
+if (isset($_GET['logout'])) {
+    session_destroy();
+    header("Location: index.php");
+    exit();
+}
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +49,7 @@
 </head>
 <body>
 
-<!-- Splash Screen -->
+<!-- Splash -->
 <section id="splash" class="section splash">
   <div class="center">
     <img src="static/logo.png" alt="EntroGroup Logo" style="height:80px;">
@@ -17,17 +57,17 @@
   </div>
 </section>
 
-<!-- Login Form -->
+<!-- Login -->
 <section id="login" class="section login">
   <?php if (!isset($_SESSION['email'])): ?>
     <h2>Login</h2>
-    <form method="POST" action="login.php">
-      <input type="email" name="email" placeholder="Enter your email" required>
-      <button type="submit">Login</button>
-    </form>
+    <a href="<?php echo $client->createAuthUrl(); ?>">
+      <button>Login with Google</button>
+    </a>
   <?php else: ?>
     <p>✅ Logged in as <b><?php echo $_SESSION['email']; ?></b></p>
-    <a href="logout.php">Logout</a>
+    <img src="<?php echo $_SESSION['picture']; ?>" style="height:40px;border-radius:50%;">
+    <a href="?logout=1">Logout</a>
   <?php endif; ?>
 </section>
 
@@ -85,7 +125,7 @@
       <button type="submit">Submit Request</button>
     </form>
   <?php else: ?>
-    <p>⚠️ Please <a href="#login">login</a> to request a service.</p>
+    <p>⚠️ Please <a href="#login">login with Google</a> to request a service.</p>
   <?php endif; ?>
 </section>
 

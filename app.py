@@ -128,7 +128,7 @@ def check_rate_limit(ip, email, table):
 # --- Landing Page ---
 @app.route("/")
 def index():
-    return render_template("index2.html", email=session.get("email"))
+    return render_template("index.html", email=session.get("email"))
 
 # --- Login + Logout ---
 @app.route("/login", methods=["POST"])
