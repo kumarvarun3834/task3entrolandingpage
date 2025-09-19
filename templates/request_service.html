@@ -1,38 +1,233 @@
-<?php
-session_start();
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = trim($_POST['name']);
-    $email = $_SESSION['email'] ?? $_POST['email'];
-    $phone = trim($_POST['phone']);
-    $service = trim($_POST['service']);
-    $details = trim($_POST['details']);
-
-    if (!$name || !$email || !$service || !$details) {
-        die("❌ All required fields must be filled.");
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Request a Service - EntroGroup & Company</title>
+<style>
+    :root {
+        --primary-color: #2563eb;
+        --accent-color: #3b82f6;
+        --text-dark: #1f2937;
+        --text-light: #6b7280;
+        --bg-light: #f9fafb;
+        --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
     }
 
-    // Send data to Flask backend
-    $backend_url = "http://localhost:5000/request-service";  // change if deployed
-    $data = json_encode([
-        "name" => $name,
-        "email" => $email,
-        "phone" => $phone,
-        "service" => $service,
-        "details" => $details
-    ]);
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+        background: var(--bg-light);
+        margin: 0;
+        padding: 0;
+        line-height: 1.6;
+        color: var(--text-dark);
+    }
 
-    $options = [
-        "http" => [
-            "header"  => "Content-Type: application/json\r\n",
-            "method"  => "POST",
-            "content" => $data
-        ]
-    ];
-    $context  = stream_context_create($options);
-    $result = file_get_contents($backend_url, false, $context);
+    header {
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        color: white;
+        text-align: center;
+        padding: 4rem 1rem 2rem;
+    }
 
-    header("Location: index.php#request-service");
-    exit;
-}
-?>
+    header h1 {
+        font-size: clamp(2rem, 5vw, 3rem);
+        margin-bottom: 0.5rem;
+    }
+
+    header p {
+        font-size: 1.25rem;
+        opacity: 0.9;
+    }
+
+    .form-container {
+        max-width: 700px;
+        margin: -3rem auto 4rem;
+        background: white;
+        padding: 2rem 2.5rem;
+        border-radius: 15px;
+        box-shadow: var(--shadow-lg);
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+        animation: fadeIn 0.8s ease-out forwards;
+    }
+
+    label {
+        font-weight: 500;
+    }
+
+    input, select, textarea {
+        padding: 12px 15px;
+        border-radius: 10px;
+        border: 1px solid #d1d5db;
+        font-size: 1rem;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    }
+
+    button {
+        padding: 15px 0;
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow);
+    }
+
+    button:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .message {
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 1rem;
+        text-align: center;
+    }
+
+    .message.success { background: #10b981; color: white; }
+    .message.error { background: #ef4444; color: white; }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px){
+        .form-container { margin: -2rem 1rem 2rem; padding: 1.5rem; }
+    }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Request a Service</h1>
+    <p>Fill the form below and we’ll get back to you quickly!</p>
+</header>
+
+<div class="form-container">
+    <form id="serviceForm">
+        <label for="s_name">Name*</label>
+        <input type="text" id="s_name" required>
+
+        <label for="s_email">Email*</label>
+        <input type="email" id="s_email" required>
+
+        <label for="s_phone">Phone</label>
+        <input type="text" id="s_phone" placeholder="Optional">
+
+        <label for="s_service">Service*</label>
+        <select id="s_service" required>
+            <option value="">-- Select a service --</option>
+            <option value="Writing">Writing</option>
+            <option value="Web Design">Web Design</option>
+            <option value="Web Development">Web Development</option>
+            <option value="Application Development">Application Development</option>
+            <option value="Blogging">Blogging</option>
+            <option value="Ghostwriting">Ghostwriting</option>
+            <option value="Logo Design">Logo Design</option>
+        </select>
+
+        <div id="subDetailsContainer" style="display:none;">
+            <label for="s_sub_details">Specify Languages / Frameworks*</label>
+            <input type="text" id="s_sub_details">
+        </div>
+
+        <label for="s_details">Additional Details*</label>
+        <textarea id="s_details" rows="4" required></textarea>
+
+        <label for="s_notes">Additional Notes</label>
+        <textarea id="s_notes" rows="2" placeholder="Optional"></textarea>
+
+        <label for="s_platform">Platform / Category</label>
+        <input type="text" id="s_platform" placeholder="Optional">
+
+        <label for="s_attachment_link">Attachment Link</label>
+        <input type="url" id="s_attachment_link" placeholder="Optional URL">
+
+        <label for="s_priority">Priority (1-5)</label>
+        <input type="number" id="s_priority" min="1" max="5" value="3">
+
+        <label for="s_budget">Budget (₹)</label>
+        <input type="number" id="s_budget" placeholder="Optional">
+
+        <label for="s_deadline">Deadline</label>
+        <input type="date" id="s_deadline">
+
+        <button type="submit">Submit Request</button>
+        <div id="serviceMessage" class="message"></div>
+    </form>
+</div>
+
+<script>
+const s_service = document.getElementById('s_service');
+const subDetailsContainer = document.getElementById('subDetailsContainer');
+const s_sub_details = document.getElementById('s_sub_details');
+const serviceForm = document.getElementById('serviceForm');
+const serviceMessage = document.getElementById('serviceMessage');
+
+s_service.addEventListener('change', () => {
+    if(s_service.value === 'Web Development' || s_service.value === 'Application Development'){
+        subDetailsContainer.style.display = 'block';
+        s_sub_details.required = true;
+    } else {
+        subDetailsContainer.style.display = 'none';
+        s_sub_details.required = false;
+        s_sub_details.value = '';
+    }
+});
+
+serviceForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    serviceMessage.style.display = 'none';
+
+    const data = {
+        name: document.getElementById('s_name').value.trim(),
+        email: document.getElementById('s_email').value.trim(),
+        phone: document.getElementById('s_phone').value.trim(),
+        service: s_service.value,
+        sub_details: s_sub_details.value.trim(),
+        details: document.getElementById('s_details').value.trim(),
+        notes: document.getElementById('s_notes').value.trim(),
+        platform: document.getElementById('s_platform').value.trim(),
+        attachment_link: document.getElementById('s_attachment_link').value.trim(),
+        priority: document.getElementById('s_priority').value,
+        budget: document.getElementById('s_budget').value,
+        deadline: document.getElementById('s_deadline').value,
+    };
+
+    try {
+        const res = await fetch('http://localhost:5001/request-service', {
+            method:'POST',
+            headers:{ 'Content-Type':'application/json' },
+            body:JSON.stringify(data)
+        });
+        const result = await res.json();
+        serviceMessage.style.display = 'block';
+        serviceMessage.className = result.status==='success'?'message success':'message error';
+        serviceMessage.innerText = result.message;
+        if(result.status==='success') serviceForm.reset();
+        subDetailsContainer.style.display='none';
+    } catch(err) {
+        serviceMessage.style.display = 'block';
+        serviceMessage.className='message error';
+        serviceMessage.innerText='⚠️ Could not connect to the server.';
+    }
+});
+</script>
+
+</body>
+</html>

@@ -130,22 +130,26 @@ def check_rate_limit(ip, email, table):
 def index():
     return render_template("index.html", email=session.get("email"))
 
-# --- Login + Logout ---
-@app.route("/login", methods=["POST"])
-def login():
-    email = request.form.get("email", "").strip()
-    if not email:
-        flash("⚠️ Please enter a valid email.", "error")
-        return redirect(url_for("index"))
-    session["email"] = email
-    flash(f"✅ Logged in as {email}", "success")
-    return redirect(url_for("index"))
+# # --- Login + Logout ---
+# @app.route("/login", methods=["POST"])
+# def login():
+#     email = request.form.get("email", "").strip()
+#     if not email:
+#         flash("⚠️ Please enter a valid email.", "error")
+#         return redirect(url_for("index"))
+#     session["email"] = email
+#     flash(f"✅ Logged in as {email}", "success")
+#     return redirect(url_for("index"))
 
-@app.route("/logout")
-def logout():
-    session.clear()
-    flash("✅ Logged out successfully.", "success")
-    return redirect(url_for("index"))
+# @app.route("/logout")
+# def logout():
+#     session.clear()
+#     flash("✅ Logged out successfully.", "success")
+#     return redirect(url_for("index"))
+
+@app.route("/request_service.html")
+def request_service_pg():
+    return render_template("request_service.html", email=session.get("email"))
 
 # --- Contact Form ---
 @app.route("/contact", methods=["POST"])
