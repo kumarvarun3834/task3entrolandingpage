@@ -125,14 +125,26 @@ def check_rate_limit(ip, email, table):
             return False, f"⚠️ You must wait {EMAIL_COOLDOWN} seconds before sending another request."
     return True, None
 
-# --- Landing Page ---
 @app.route("/")
 def index():
+    return render_template("main.html", email=session.get("email"))
+
+# --- Landing Page ---
+@app.route("/design1")
+def index1():
     return render_template("frontend1.html", email=session.get("email"))
 
-@app.route("/request_service.html")
-def request_service_pg():
-    return render_template("request_service.html", email=session.get("email"))
+@app.route("/design2")
+def index2():
+    return render_template("frontend2.html", email=session.get("email"))
+
+@app.route("/design1/request_service.html")
+def request_service_pg1():
+    return render_template("request_service1.html", email=session.get("email"))
+
+@app.route("/design2/request_service.html")
+def request_service_pg2():
+    return render_template("request_service2.html", email=session.get("email"))
 
 # --- Contact Form ---
 @app.route("/contact", methods=["POST"])

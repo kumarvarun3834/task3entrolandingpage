@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Select Design</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+    }
+    .container {
+      text-align: center;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(8px);
+    }
+    h2 {
+      margin-bottom: 30px;
+      font-size: 28px;
+      font-weight: bold;
+    }
+    a {
+      display: inline-block;
+      padding: 14px 32px;
+      margin: 12px;
+      font-size: 18px;
+      border-radius: 10px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      color: #fff;
+    }
+    .btn1 {
+      background: #007bff;
+    }
+    .btn2 {
+      background: #28a745;
+    }
+    a:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Choose Your Design</h2>
+    <a href="design1" class="btn1">Design 1</a>
+    <a href="design2" class="btn2">Design 2</a>
+  </div>
+</body>
+</html>
