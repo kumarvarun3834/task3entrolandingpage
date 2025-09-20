@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Entro Group & Company — Landing App</title>
+  <link rel="stylesheet" href="static/style2.css" />
+  <link rel="icon" href="static/fav-icon.png" />
+  <script defer src="static/script.js"></script>
+</head>
+<body>
+
+  <!-- Top Nav (mobile-first) -->
+  <header class="nav">
+    <div class="nav-left">
+      <img src="static/logo.jpg" alt="Entro Logo" class="logo" />
+      <span class="brand">ENTRO</span>
+    </div>
+    <button class="nav-toggle" aria-label="Open menu" id="navToggle">☰</button>
+    <nav id="navMenu" class="nav-menu">
+      <a href="#about">About</a>
+      <a href="#services">Services</a>
+      <a href="#internship">Internships</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section id="hero" class="panel hero">
+    <div class="hero-left">
+      <h1 class="hero-title">We Build Digital Experiences</h1>
+      <p class="hero-sub">Writing • Web Design • Web & App Development • Creative Solutions</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#contact">Get in Touch</a>
+        <a class="btn btn-outline" href="#internship">Join Our Internship</a>
+      </div>
+    </div>
+    <div class="hero-right">
+      <img src="static/hiring.jpg" alt="We are Hiring" class="hero-image" />
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about" class="panel about reveal">
+    <div class="about-grid">
+      <div class="about-image">
+        <img src="static/logo.jpg" alt="EntroGroup Logo" />
+      </div>
+      <div class="about-content">
+        <h2>Who We Are</h2>
+        <p>
+          EntroGroup & Company delivers seamless, high-quality solutions in writing, web development,
+          app development, and web design. We collaborate with clients to deliver purposeful digital
+          experiences and provide internship opportunities in development and design.
+        </p>
+        <ul class="strengths">
+          <li>✅ Transparency in services</li>
+          <li>✅ Customer-first approach</li>
+          <li>✅ Next-gen technology</li>
+        </ul>
+        <p class="muted">Headquarters: Jhajjar, Haryana • Founded: 2021</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section id="services" class="panel services reveal">
+    <h2>Our Services</h2>
+    <div class="services-grid">
+      <div class="service">
+        <div class="service-ico">✍️</div>
+        <h4>Writing</h4>
+      </div>
+      <div class="service">
+        <div class="service-ico">🎨</div>
+        <h4>Web Design</h4>
+      </div>
+      <div class="service">
+        <div class="service-ico">💻</div>
+        <h4>Web Development</h4>
+      </div>
+      <div class="service">
+        <div class="service-ico">📱</div>
+        <h4>App Development</h4>
+      </div>
+      <div class="service">
+        <div class="service-ico">📰</div>
+        <h4>Blogging</h4>
+      </div>
+      <div class="service">
+        <div class="service-ico">👻</div>
+        <h4>Ghostwriting</h4>
+      </div>
+      <div class="service">
+        <div class="service-ico">✨</div>
+        <h4>Logo Design</h4>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTERNSHIP / HIRING -->
+  <section id="internship" class="panel internship reveal">
+    <div class="intern-content">
+      <h2>We're Hiring — App Developer Intern</h2>
+      <p>
+        Free internships available in Flutter/Dart, Java, Kotlin, web & app development. Paid specialized
+        internships coming soon. We never charge for the standard internship programs.
+      </p>
+      <button onclick="window.open('https://www.linkedin.com/company/entrogroups/jobs/', '_blank')" 
+        class="btn-apply">
+  🚀 Apply Now
+</button>
+
+
+    </div>
+    <div class="intern-image">
+      <img src="static/hiring.jpg" alt="Hiring" />
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" class="panel contact reveal">
+    <div class="contact-left">
+      <h2>Contact Us</h2>
+      <form id="contactForm" class="contact-form" novalidate>
+        <label class="sr-only" for="name">Name</label>
+        <input id="name" name="name" type="text" placeholder="Your name" required />
+        <label class="sr-only" for="email">Email</label>
+        <input id="email" name="email" type="email" placeholder="name@domain.com" required />
+        <label class="sr-only" for="message">Message</label>
+        <textarea id="message" name="message" placeholder="Tell us about your project" required></textarea>
+        <div class="form-row">
+          <button type="submit" class="btn btn-primary" id="submitBtn">Send Message</button>
+          <div id="formStatus" class="form-status" aria-live="polite"></div>
+        </div>
+      </form>
+      <p class="muted small">Or email us at <a href="mailto:info@entrogroup.in">info@entrogroup.in</a></p>
+    </div>
+
+    <div class="contact-right">
+      <h3>Visit or Connect</h3>
+      <p><strong>Address:</strong> Jhajjar, Haryana 124103, India</p>
+      <p><strong>Phone:</strong> <a href="tel:+919876543210">+91 98765 43210</a></p>
+      <p><strong>LinkedIn:</strong> <a href="https://www.linkedin.com/company/entrogroups/" target="_blank">EntroGroup on LinkedIn</a></p>
+      <div class="mapwrap">
+        <iframe
+          loading="lazy"
+          title="map"
+          src="https://www.google.com/maps?q=Jhajjar%20Haryana&output=embed"
+        ></iframe>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div>© <span id="year"></span> Entro Group & Company</div>
+    <p>
+  📧 Email us: 
+  <a href="https://mail.google.com/mail/?view=cm&fs=1&to=contact@entrogroups.com" 
+     target="_blank" 
+     rel="noopener noreferrer"
+     class="email-link">
+    contact@entrogroups.com
+  </a>
+</p>
+
+
+
+  </footer>
+
+</body>
+</html>
