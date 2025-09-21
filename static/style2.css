@@ -92,11 +92,6 @@ body{
   -webkit-text-fill-color: transparent;
 }
 .hero-sub{margin:0 0 12px 0;color:var(--midgray)}
-.hero-image{
-  max-width:220px;border-radius:12px;
-  box-shadow:0 10px 25px rgba(10,37,64,0.15);
-  transition:transform 0.3s ease;
-}
 .hero-image:hover{transform:translateY(-5px) scale(1.02);}
 
 /* Buttons - Enhanced with better hover effects */
@@ -169,6 +164,50 @@ body{
 .service-ico{font-size:22px;margin-bottom:8px;transition:transform 0.3s ease;position:relative;z-index:2;}
 .service:hover .service-ico{transform:scale(1.2) rotateY(360deg);}
 .service h4{position:relative;z-index:2;}
+/* Fix image spacing */
+.hero-image,
+.intern-image img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+#hero { margin-bottom: 1rem; }
+.panel { padding: 2rem 1rem; }
+
+/* Service form styling */
+.form-container {
+  max-width: 700px;
+  margin: 2rem auto;
+  background: white;
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.form-container label { font-weight: 500; margin-top: 0.5rem; display: block; }
+.form-container input,
+.form-container select,
+.form-container textarea {
+  width: 100%;
+  padding: 10px 12px;
+  margin-top: 0.3rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+}
+.form-container button {
+  margin-top: 1rem;
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.message {
+  padding: 12px;
+}
 
 /* INTERNSHIP - Enhanced with gradient background */
 .internship{
@@ -178,6 +217,30 @@ body{
 }
 .intern-content h2{color:var(--white);}
 .intern-image img{width:100%;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.3);}
+/* ...existing code... */
+.internship-flex {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+.intern-image img {
+  max-width: 120px;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+@media (min-width: 900px) {
+  .intern-image img {
+    max-width: 220px;
+  }
+}
+.intern-content {
+  flex: 1 1 300px;
+}
+
+/* ...existing code... */
 /* Apply Now Button */
 .btn-apply {
   background: linear-gradient(90deg, #0056D2, #00AEEF);

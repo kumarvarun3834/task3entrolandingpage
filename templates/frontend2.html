@@ -19,7 +19,8 @@
     <button class="nav-toggle" aria-label="Open menu" id="navToggle">☰</button>
     <nav id="navMenu" class="nav-menu">
       <a href="#about">About</a>
-      <a href="#services">Services</a>
+      <!-- Changed Services link to open service.html -->
+      <a href="service.html" target="_blank">Services</a>
       <a href="#internship">Internships</a>
       <a href="#contact">Contact</a>
     </nav>
@@ -34,9 +35,6 @@
         <a class="btn btn-primary" href="#contact">Get in Touch</a>
         <a class="btn btn-outline" href="#internship">Join Our Internship</a>
       </div>
-    </div>
-    <div class="hero-right">
-      <img src="static/hiring.jpg" alt="We are Hiring" class="hero-image" />
     </div>
   </section>
 
@@ -66,40 +64,25 @@
   <!-- SERVICES -->
   <section id="services" class="panel services reveal">
     <h2>Our Services</h2>
+    <!-- Service cards only, form removed -->
     <div class="services-grid">
-      <div class="service">
-        <div class="service-ico">✍️</div>
-        <h4>Writing</h4>
-      </div>
-      <div class="service">
-        <div class="service-ico">🎨</div>
-        <h4>Web Design</h4>
-      </div>
-      <div class="service">
-        <div class="service-ico">💻</div>
-        <h4>Web Development</h4>
-      </div>
-      <div class="service">
-        <div class="service-ico">📱</div>
-        <h4>App Development</h4>
-      </div>
-      <div class="service">
-        <div class="service-ico">📰</div>
-        <h4>Blogging</h4>
-      </div>
-      <div class="service">
-        <div class="service-ico">👻</div>
-        <h4>Ghostwriting</h4>
-      </div>
-      <div class="service">
-        <div class="service-ico">✨</div>
-        <h4>Logo Design</h4>
-      </div>
+      <div class="service"><div class="service-ico">✍️</div><h4>Writing</h4></div>
+      <div class="service"><div class="service-ico">🎨</div><h4>Web Design</h4></div>
+      <div class="service"><div class="service-ico">💻</div><h4>Web Development</h4></div>
+      <div class="service"><div class="service-ico">📱</div><h4>App Development</h4></div>
+      <div class="service"><div class="service-ico">📰</div><h4>Blogging</h4></div>
+      <div class="service"><div class="service-ico">👻</div><h4>Ghostwriting</h4></div>
+      <div class="service"><div class="service-ico">✨</div><h4>Logo Design</h4></div>
     </div>
+    <!-- Service request form removed from main page -->
   </section>
 
   <!-- INTERNSHIP / HIRING -->
   <section id="internship" class="panel internship reveal">
+  <div class="internship-flex">
+    <div class="intern-image">
+      <img src="static/hiring.jpg" alt="Hiring" style="max-width:120px; height:auto;" />
+    </div>
     <div class="intern-content">
       <h2>We're Hiring — App Developer Intern</h2>
       <p>
@@ -107,16 +90,11 @@
         internships coming soon. We never charge for the standard internship programs.
       </p>
       <button onclick="window.open('https://www.linkedin.com/company/entrogroups/jobs/', '_blank')" 
-        class="btn-apply">
-  🚀 Apply Now
-</button>
-
-
+        class="btn-apply">🚀 Apply Now</button>
     </div>
-    <div class="intern-image">
-      <img src="static/hiring.jpg" alt="Hiring" />
-    </div>
-  </section>
+    
+  </div>
+</section>
 
   <!-- CONTACT -->
   <section id="contact" class="panel contact reveal">
@@ -155,17 +133,14 @@
   <footer class="footer">
     <div>© <span id="year"></span> Entro Group & Company</div>
     <p>
-  📧 Email us: 
-  <a href="https://mail.google.com/mail/?view=cm&fs=1&to=contact@entrogroups.com" 
-     target="_blank" 
-     rel="noopener noreferrer"
-     class="email-link">
-    contact@entrogroups.com
-  </a>
-</p>
-
-
-
+      📧 Email us: 
+      <a href="https://mail.google.com/mail/?view=cm&fs=1&to=contact@entrogroups.com" 
+         target="_blank" 
+         rel="noopener noreferrer"
+         class="email-link">
+        contact@entrogroups.com
+      </a>
+    </p>
   </footer>
 
 </body>
